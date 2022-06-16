@@ -469,14 +469,6 @@ public class VerifyActivity extends AppCompatActivity {
 
             }
         });
-//        AlertDialog.Builder builder1 = builder.setPositiveButton("确定",new DialogInterface.OnClickListener() {
-//
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                Toast.makeText(MainActivity.this,"选择了确定", Toast.LENGTH_SHORT).show();
-//            }
-//
-//        });
 
         AlertDialog alertDialog = builder.create();//这个方法可以返回一个alertDialog对象
         alertDialog.show();
