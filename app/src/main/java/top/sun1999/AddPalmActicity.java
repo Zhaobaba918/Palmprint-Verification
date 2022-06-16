@@ -208,8 +208,6 @@ public class AddPalmActicity extends AppCompatActivity {
         Log.e("myVec", myVec.toString());
 
         inputName();
-        Util.vecs.add(myVecDouble);
-
 
         tvInfo.setText(String.format(Locale.CHINESE,
                 "ImgSize: %dx%d\nUseTime: %d ms\n特征向量已保存",
@@ -230,9 +228,14 @@ public class AddPalmActicity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String palmName = et.getText().toString();
+                if (palmName==null){
+                    thresholdTextview.setText("掌纹应该有个名字！");
+                    return;
+                }
                 thresholdTextview.setText(palmName);
                 name = palmName;
                 Util.names.add(name);
+                Util.vecs.add(myVecDouble);
             }
         });
         AlertDialog alertDialog = builder.create();
