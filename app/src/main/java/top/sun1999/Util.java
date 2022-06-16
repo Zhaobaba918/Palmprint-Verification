@@ -1,5 +1,6 @@
 package top.sun1999;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -8,16 +9,21 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.util.Log;
 
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Util {
 
-    public static Map<String,float[]> vecs = new HashMap<>();
-
+    public static List<String> names = new ArrayList<>();
+    public static List<double[]> vecs = new ArrayList<>();
 
     public static List<Double> onePoint(double x, double y, Double angle) {
         Double X = x * Math.cos(angle) + y * Math.sin(angle);
@@ -37,7 +43,7 @@ public class Util {
         float x3 = 0;
         float y3 = 0;
 
-        if (yoloRes.length!=3){
+        if (yoloRes.length != 3) {
             return null;
         }
         for (Box box : yoloRes) {
@@ -54,7 +60,7 @@ public class Util {
                 y3 = (box.y1 + box.y0) / 2;
             }
         }
-        if (x2 == 0 || x3 == 0){
+        if (x2 == 0 || x3 == 0) {
             return null;
         }
 
@@ -105,7 +111,7 @@ public class Util {
         return img;
     }
 
-    public static Bitmap extractROI(Bitmap img, Box[] yoloRes,Boolean draw) {
+    public static Bitmap extractROI(Bitmap img, Box[] yoloRes, Boolean draw) {
         Integer H = img.getHeight(), W = img.getWidth();
         float x1 = -1;
         float y1 = 0;
@@ -114,7 +120,7 @@ public class Util {
         float x3 = 0;
         float y3 = 0;
 
-        if (yoloRes.length!=3){
+        if (yoloRes.length != 3) {
             return null;
         }
         for (Box box : yoloRes) {
@@ -131,13 +137,12 @@ public class Util {
                 y3 = (box.y1 + box.y0) / 2;
             }
         }
-        if (x2 == 0 || x3 == 0){
+        if (x2 == 0 || x3 == 0) {
             return null;
         }
 
         float x0 = (x1 + x2) / 2;
         float y0 = (y1 + y2) / 2;
-
 
 
         double unitLen = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
@@ -200,7 +205,6 @@ public class Util {
 
         return newimg;
     }
-
 
 
     public static void main(String[] args) {

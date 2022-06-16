@@ -7,6 +7,13 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Arrays;
+
 public class NewMainActivity extends AppCompatActivity {
 
     Button beginVerifyButton;
@@ -37,9 +44,40 @@ public class NewMainActivity extends AppCompatActivity {
             }
         });
 
-
+        readVecs();
     }
 
+    public void readVecs() {
+        FileInputStream input = null;
+        BufferedReader bufferedReader = null;
+        try {
+            input = openFileInput("vecs.txt");
+            bufferedReader = new BufferedReader(new InputStreamReader(input));
+            String s = bufferedReader.readLine();
+            while (s!=null) {
+                if (s.indexOf('[') >= 0) {
+                    s = s.substring(1, s.length() - 1);
+                    String[] split = s.split(",");
+                    double[] doubles = Arrays.stream(split).mapToDouble(Double::parseDouble).toArray();
+                    Util.vecs.add(doubles);
+                } else {
+                    Util.names.add(s);
+                }
+                s = bufferedReader.readLine();
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                bufferedReader.close();
+                input.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
+    }
 
 }

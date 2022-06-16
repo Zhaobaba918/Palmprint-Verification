@@ -10,6 +10,7 @@ import androidx.core.content.FileProvider;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -37,16 +38,20 @@ import org.pytorch.Module;
 import org.pytorch.Tensor;
 import org.pytorch.torchvision.TensorImageUtils;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.lang.ref.SoftReference;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -66,6 +71,7 @@ public class AddPalmActicity extends AppCompatActivity {
     private final double threshold = 0.35;
     private final double nms_threshold = 0.7;
     private float[] myVec;
+    private double[] myVecDouble = new double[512];
     private Module module;
 
 
@@ -190,19 +196,19 @@ public class AddPalmActicity extends AppCompatActivity {
         long endTime;
         myVec = outputTensor.getDataAsFloatArray();
 
-        float sum = 0;
+        double sum = 0;
         for (float tmp : myVec) {
             sum += tmp * tmp;
         }
-        sum = (float) Math.sqrt(sum);
+        sum = Math.sqrt(sum);
         for (int i = 0; i < myVec.length; i++) {
-            myVec[i] /= sum;
+            myVecDouble[i] = myVec[i] / sum;
         }
         endTime = System.currentTimeMillis();
         Log.e("myVec", myVec.toString());
 
         inputName();
-
+        Util.vecs.add(myVecDouble);
 
 
         tvInfo.setText(String.format(Locale.CHINESE,
@@ -212,8 +218,7 @@ public class AddPalmActicity extends AppCompatActivity {
 
     String name;
 
-    public void inputName()
-    {
+    public void inputName() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("设置名称");
         final EditText et = new EditText(this);
@@ -227,7 +232,7 @@ public class AddPalmActicity extends AppCompatActivity {
                 String palmName = et.getText().toString();
                 thresholdTextview.setText(palmName);
                 name = palmName;
-                Util.vecs.put(name,myVec);
+                Util.names.add(name);
             }
         });
         AlertDialog alertDialog = builder.create();
@@ -335,11 +340,39 @@ public class AddPalmActicity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        if (name!=null){
-            JSONObject jsonObject = new JSONObject(Util.vecs);
-            Log.e("palms",jsonObject.toString());
-        }
+        if (name != null) {
 
+            FileOutputStream outputStream = null;
+            BufferedWriter bufferedWriter = null;
+            try {
+                outputStream = openFileOutput("vecs.txt", MODE_PRIVATE);
+                bufferedWriter = new BufferedWriter(new
+                        OutputStreamWriter(outputStream));
+
+                for (double[] arr : Util.vecs) {
+                    String strArr[] = Arrays.stream(arr).mapToObj(String::valueOf).toArray(String[]::new);
+                    bufferedWriter.write(Arrays.toString(strArr));
+                    bufferedWriter.write('\n');
+                }
+                for (String s : Util.names) {
+                    bufferedWriter.write(s);
+                    bufferedWriter.write('\n');
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    assert bufferedWriter != null;
+                    bufferedWriter.close();
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        name = null;
     }
 
 }
