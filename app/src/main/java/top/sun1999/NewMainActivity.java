@@ -18,6 +18,8 @@ public class NewMainActivity extends AppCompatActivity {
 
     Button beginVerifyButton;
     Button addPalmButton;
+    Button multiRecognizeButton;
+    Button deletePalmprint;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,9 +28,10 @@ public class NewMainActivity extends AppCompatActivity {
 
         beginVerifyButton = findViewById(R.id.beginVerifying);
         addPalmButton = findViewById(R.id.addPalmButton);
+        multiRecognizeButton = findViewById(R.id.multiRecognize);
+        deletePalmprint = findViewById(R.id.deletePalmprint);
 
-
-        beginVerifyButton.setOnClickListener(new View.OnClickListener() {
+        multiRecognizeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(NewMainActivity.this, VerifyActivity.class);
@@ -40,6 +43,14 @@ public class NewMainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(NewMainActivity.this, AddPalmActicity.class);
+                startActivity(i);
+            }
+        });
+
+        beginVerifyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(NewMainActivity.this, SingleVerifyActivity.class);
                 startActivity(i);
             }
         });

@@ -117,7 +117,7 @@ public class SingleVerifyActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        makeDialog("");
+//        makeDialog("");
 
         inputName();
     }
@@ -126,9 +126,10 @@ public class SingleVerifyActivity extends AppCompatActivity {
     int palmIndex;
 
     public void inputName() {
+        String[] names=Util.names.toArray(new String[Util.names.size()]);
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("选择想要识别的掌纹")//设置对话框的标题
-                .setSingleChoiceItems((ListAdapter) Util.names, 1, new DialogInterface.OnClickListener() {
+                .setSingleChoiceItems(names, -1, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         palmIndex = which;
@@ -137,7 +138,7 @@ public class SingleVerifyActivity extends AppCompatActivity {
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
+//                        palmIndex = which;
                     }
                 }).create();
         dialog.show();
@@ -254,7 +255,7 @@ public class SingleVerifyActivity extends AppCompatActivity {
                         sum = (float) Math.sqrt(sum);
 
                         double dot = 0;
-                        for (int i = 0; i < vec.length; i++) {
+                        for (int i = 0; i < 512; i++) {
                             dot += vec[i] / sum * Util.vecs.get(palmIndex)[i];
                         }
 
