@@ -22,8 +22,8 @@ import java.util.Map;
 
 public class Util {
 
-    public static List<String> names = new ArrayList<>();
-    public static List<double[]> vecs = new ArrayList<>();
+    public static ArrayList<String> names = new ArrayList<>();
+    public static ArrayList<double[]> vecs = new ArrayList<>();
 
     public static List<Double> onePoint(double x, double y, Double angle) {
         Double X = x * Math.cos(angle) + y * Math.sin(angle);
