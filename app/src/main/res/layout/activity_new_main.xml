@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="256dp"
         android:layout_marginEnd="160dp"
-        android:text="开始识别"
+        android:text="多人识别"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

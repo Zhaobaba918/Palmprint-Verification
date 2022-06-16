@@ -60,12 +60,14 @@ import java.lang.ref.SoftReference;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.lang.Math.PI;
+import static java.lang.Math.max;
 import static java.lang.Math.pow;
 
 import org.pytorch.IValue;
@@ -88,8 +90,8 @@ public class VerifyActivity extends AppCompatActivity {
     private final double threshold = 0.35;
     private final double nms_threshold = 0.7;
 
-    private final AtomicBoolean detecting = new AtomicBoolean(false);
-    private final AtomicBoolean detectPhoto = new AtomicBoolean(false);
+//    private final AtomicBoolean detecting = new AtomicBoolean(false);
+//    private final AtomicBoolean detectPhoto = new AtomicBoolean(false);
 
     private long startTime = 0;
     private long endTime = 0;
@@ -97,7 +99,7 @@ public class VerifyActivity extends AppCompatActivity {
     private int height;
     private static final Paint boxPaint = new Paint();
 
-    private float[] myVec;
+    //    private float[] myVec;
     private Module module;
 
     @Override
@@ -118,39 +120,17 @@ public class VerifyActivity extends AppCompatActivity {
         thresholdTextview = findViewById(R.id.valTxtView);
         tvInfo = findViewById(R.id.tv_info);
 
-        thresholdTextview.setText("先录入掌纹，然后识别");
+        thresholdTextview.setText("在掌纹库中进行匹配相似的掌纹");
 
         Button inference = findViewById(R.id.button);
         inference.setOnClickListener(view -> {
-//            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//            // Ensure that there's a camera activity to handle the intent
-//            if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-//                // Create the File where the photo should go
-//                File photoFile = null;
-//                try {
-//                    photoFile = createImageFile();
-//                } catch (IOException ex) {
-//                    // Error occurred while creating the File
-//                    Log.e("文件创建失败", ex.toString());
-//                }
-//                // Continue only if the File was successfully created
-//                if (photoFile != null) {
-//                    Uri photoURI = FileProvider.getUriForFile(this, "top.sun1999.fileProvider", photoFile);
-//                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-//                    startActivityForResult(takePictureIntent, 1);
-//                }
-//            }
             finish();
-//            Intent intent = new Intent(Intent.ACTION_PICK);
-//            intent.setType("image/*");
-//            startActivityForResult(intent, REQUEST_PICK_IMAGE);
         });
 
-        resultImageView.setOnClickListener(v -> {
-            detectPhoto.set(false);
-            Log.e("click", "点击了按钮");
-//            startCamera();
-        });
+//        resultImageView.setOnClickListener(v -> {
+//            detectPhoto.set(false);
+//            Log.e("click", "点击了按钮");
+//        });
         startCamera();
         try {
             module = Module.load(assetFilePath(this, "best.pt"));
@@ -210,27 +190,16 @@ public class VerifyActivity extends AppCompatActivity {
         return analysis;
     }
 
-    int goodNum = 0;
-    int badNum = 0;
-
-//    Handler handler = new Handler(){
-//        @Override
-//        public void handleMessage(Message message){
-//            super.handleMessage(message);
-//            makeDialog(message.toString());
-//        }
-//    };
 
     private class DetectAnalyzer implements ImageAnalysis.Analyzer {
         @Override
         public void analyze(ImageProxy image, final int rotationDegrees) {
-            if (detecting.get() || detectPhoto.get()) {
-                return;
-            }
-            detecting.set(true);
+//            if (detecting.get() || detectPhoto.get()) {
+//                return;
+//            }
+//            detecting.set(true);
             final Bitmap bitmapsrc = imageToBitmap(image);  // 格式转换
             Thread detectThread = new Thread(() -> {
-//                handler.sendEmptyMessage(1);
                 Matrix matrix = new Matrix();
                 matrix.postRotate(rotationDegrees);
                 width = bitmapsrc.getWidth();
@@ -265,12 +234,11 @@ public class VerifyActivity extends AppCompatActivity {
                 String res;
                 Bitmap roi = Util.extractROI(mutableBitmap, result, true);
 
-                if (myVec == null) {
+                if (Util.names.size() == 0) {
                     res = "请录入掌纹";
                 } else {
                     if (roi == null) {
                         res = "请将摄像头对准手掌";
-                        goodNum = badNum = 0;
                     } else {
                         final Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(roi,
                                 TensorImageUtils.TORCHVISION_NORM_MEAN_RGB, TensorImageUtils.TORCHVISION_NORM_STD_RGB, MemoryFormat.CHANNELS_LAST);
@@ -285,45 +253,33 @@ public class VerifyActivity extends AppCompatActivity {
                         }
                         sum = (float) Math.sqrt(sum);
 
-                        float dot = 0;
-                        for (int i = 0; i < myVec.length; i++) {
-                            dot += vec[i] / sum * myVec[i];
+                        List<Double> dot = new ArrayList<>();
+                        double tmpDot = 0f;
+                        for (double[] vect : Util.vecs) {
+                            for (int i = 0; i < vect.length; i++) {
+                                tmpDot += vec[i] / sum * vect[i];
+                            }
+                            dot.add(tmpDot);
                         }
+                        double maxDot = -1;
+                        for (int i = 0; i < dot.size(); i++) {
+                            if (dot.get(i) > maxDot) {
+                                maxDot = dot.get(i);
+                            }
+                        }
+                        String name = Util.names.get(dot.indexOf(maxDot));
+
                         endTime = System.currentTimeMillis();
-//                        String res1;
-//                        if (dot > 0.294) {
-//                            res1 = "掌纹匹配成功";
-//                            goodNum += 1;
-//                            badNum = 0;
-//                            if (goodNum > 5) {
-//                                Looper.prepare();
-//                                goodNum = 0;
-//                                makeDialog("掌纹匹配成功");
-////                                Handler handler1 =
-////                                Looper.loop();
-//                            }
-//                        } else {
-//                            res1 = "掌纹匹配失败";
-//                            badNum += 1;
-//                            goodNum = 0;
-//                            if (badNum > 5) {
-//                                makeDialog("掌纹匹配失败");
-//                                badNum = 0;
-//                            }
-//                        }
-                        String res1 = dot > 0.432 ? "掌纹匹配成功" : "掌纹匹配失败";
+//                        String res1 = dot > 0.432 ? "掌纹匹配成功" : "掌纹匹配失败";
                         res = String.format(Locale.CHINESE,
-                                "ImgSize: %dx%d\nUseTime: %d ms\n相似度: %.3f %s ",
-                                mutableBitmap.getHeight(), mutableBitmap.getWidth(), endTime - startTime, dot, res1);
+                                "%s，你被我认出来了！\n相似度: %.3f\nImgSize: %dx%d\nUseTime: %d ms",
+                                name, maxDot, mutableBitmap.getHeight(), mutableBitmap.getWidth(), endTime - startTime);
 
                     }
 
                 }
                 runOnUiThread(() -> {
                     resultImageView.setImageBitmap(mutableBitmap);
-                    detecting.set(false);
-//                    long dur = endTime - startTime;
-//                    float fps = (float) (1000.0 / dur);
                     tvInfo.setText(res);
                 });
             }, "detect");
@@ -375,87 +331,87 @@ public class VerifyActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-//        if (data == null) {
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+////        if (data == null) {
+////            return;
+////        }
+//
+//        detectPhoto.set(true);
+//
+////        byte[] photoByUrl = getPhotoByUrl(currentPhotoPath);
+////        Bitmap image = byteToBitmap(getPhotoByUrl(currentPhotoPath));
+////        Bitmap image = (Bitmap) photoByUrl;
+//        Bitmap image = getPicture(data.getData());
+//        //根据Uri显示本地图片
+////        photoImageView.setImageURI(uri);
+////        Log.d("success","路径：" + uri.toString());
+//
+//
+////        Bundle bundle = data.getExtras(); // 从data中取出传递回来缩略图的信息，图片质量差，适合传递小图片
+////        Bitmap image = (Bitmap) bundle.get("data"); // 将data中的信息流解析为Bitmap类型
+//
+////        Bitmap image = getPicture(data.getData());
+//
+//        startTime = System.currentTimeMillis();
+//        Box[] result = YOLOv4.detect(image, threshold, nms_threshold);
+//        Bitmap tmpimage = Util.extractROI(image, result);
+//        resultImageView.setImageBitmap(tmpimage);
+//        if (tmpimage == null) {
+//            tvInfo.setText("Yolo 识别失败");
+////            detectPhoto.set(false);
 //            return;
 //        }
-
-        detectPhoto.set(true);
-
-//        byte[] photoByUrl = getPhotoByUrl(currentPhotoPath);
-//        Bitmap image = byteToBitmap(getPhotoByUrl(currentPhotoPath));
-//        Bitmap image = (Bitmap) photoByUrl;
-        Bitmap image = getPicture(data.getData());
-        //根据Uri显示本地图片
-//        photoImageView.setImageURI(uri);
-//        Log.d("success","路径：" + uri.toString());
-
-
-//        Bundle bundle = data.getExtras(); // 从data中取出传递回来缩略图的信息，图片质量差，适合传递小图片
-//        Bitmap image = (Bitmap) bundle.get("data"); // 将data中的信息流解析为Bitmap类型
-
-//        Bitmap image = getPicture(data.getData());
-
-        startTime = System.currentTimeMillis();
-        Box[] result = YOLOv4.detect(image, threshold, nms_threshold);
-        Bitmap tmpimage = Util.extractROI(image, result);
-        resultImageView.setImageBitmap(tmpimage);
-        if (tmpimage == null) {
-            tvInfo.setText("Yolo 识别失败");
-//            detectPhoto.set(false);
-            return;
-        }
-
-
-        // preparing input tensor
-        final Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(tmpimage,
-                TensorImageUtils.TORCHVISION_NORM_MEAN_RGB, TensorImageUtils.TORCHVISION_NORM_STD_RGB, MemoryFormat.CHANNELS_LAST);
-
-        // running the model
-        final Tensor outputTensor = module.forward(IValue.from(inputTensor)).toTensor();
-
-
-        if (true) {
-//            if (myVec == null) {
-            // getting tensor content as java array of floats
-            myVec = outputTensor.getDataAsFloatArray();
-
-            float sum = 0;
-            for (float tmp : myVec) {
-                sum += tmp * tmp;
-            }
-            sum = (float) Math.sqrt(sum);
-            for (int i = 0; i < myVec.length; i++) {
-                myVec[i] /= sum;
-            }
-            endTime = System.currentTimeMillis();
-            Log.e("myVec", myVec.toString());
-            tvInfo.setText(String.format(Locale.CHINESE,
-                    "ImgSize: %dx%d\nUseTime: %d ms\n特征向量已保存",
-                    image.getHeight(), image.getWidth(), endTime - startTime));
-        } else {
-            float[] vec = outputTensor.getDataAsFloatArray();
-            float sum = 0;
-            for (float tmp : vec) {
-                sum += tmp * tmp;
-            }
-            sum = (float) Math.sqrt(sum);
-
-            float dot = 0;
-            for (int i = 0; i < myVec.length; i++) {
-                dot += vec[i] / sum * myVec[i];
-            }
-            endTime = System.currentTimeMillis();
-            String res = dot > 0.432 ? "掌纹匹配成功" : "掌纹匹配失败";
-            tvInfo.setText(String.format(Locale.CHINESE,
-                    "ImgSize: %dx%d\nUseTime: %d ms\n相似度: %.3f %s ",
-                    image.getHeight(), image.getWidth(), endTime - startTime, dot, res));
-
-        }
-//        detectPhoto.set(false);
-    }
+//
+//
+//        // preparing input tensor
+//        final Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(tmpimage,
+//                TensorImageUtils.TORCHVISION_NORM_MEAN_RGB, TensorImageUtils.TORCHVISION_NORM_STD_RGB, MemoryFormat.CHANNELS_LAST);
+//
+//        // running the model
+//        final Tensor outputTensor = module.forward(IValue.from(inputTensor)).toTensor();
+//
+//
+//        if (true) {
+////            if (myVec == null) {
+//            // getting tensor content as java array of floats
+//            myVec = outputTensor.getDataAsFloatArray();
+//
+//            float sum = 0;
+//            for (float tmp : myVec) {
+//                sum += tmp * tmp;
+//            }
+//            sum = (float) Math.sqrt(sum);
+//            for (int i = 0; i < myVec.length; i++) {
+//                myVec[i] /= sum;
+//            }
+//            endTime = System.currentTimeMillis();
+//            Log.e("myVec", myVec.toString());
+//            tvInfo.setText(String.format(Locale.CHINESE,
+//                    "ImgSize: %dx%d\nUseTime: %d ms\n特征向量已保存",
+//                    image.getHeight(), image.getWidth(), endTime - startTime));
+//        } else {
+//            float[] vec = outputTensor.getDataAsFloatArray();
+//            float sum = 0;
+//            for (float tmp : vec) {
+//                sum += tmp * tmp;
+//            }
+//            sum = (float) Math.sqrt(sum);
+//
+//            float dot = 0;
+//            for (int i = 0; i < myVec.length; i++) {
+//                dot += vec[i] / sum * myVec[i];
+//            }
+//            endTime = System.currentTimeMillis();
+//            String res = dot > 0.432 ? "掌纹匹配成功" : "掌纹匹配失败";
+//            tvInfo.setText(String.format(Locale.CHINESE,
+//                    "ImgSize: %dx%d\nUseTime: %d ms\n相似度: %.3f %s ",
+//                    image.getHeight(), image.getWidth(), endTime - startTime, dot, res));
+//
+//        }
+////        detectPhoto.set(false);
+//    }
 
     public void makeDialog(String text) {
         //创建一个警告对话框
