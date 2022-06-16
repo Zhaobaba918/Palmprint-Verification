@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Learning/21-22-2/CV/PalmprintVerification/Palmprint-Verification/app/src/main/res/layout/activity_add_palm_acticity.xml" value="0.2015625" />
+        <entry key="..\:/Learning/21-22-2/CV/PalmprintVerification/Palmprint-Verification/app/src/main/res/layout/activity_main.xml" value="0.20104166666666667" />
+        <entry key="..\:/Learning/21-22-2/CV/PalmprintVerification/Palmprint-Verification/app/src/main/res/layout/activity_new_main.xml" value="0.2015625" />
+        <entry key="..\:/Learning/21-22-2/CV/PalmprintVerification/ncnn-android-yolov4-tiny-custom/app/src/main/res/layout/activity_main.xml" value="0.1296875" />
+        <entry key="..\:/Learning/21-22-2/CV/PalmprintVerification/ncnn-android-yolov4-tiny-custom/app/src/main/res/layout/activity_new_main.xml" value="0.2" />
+        <entry key="..\:/Learning/21-22-2/CV/PalmprintVerification/ncnn-android-yolov4-tiny-custom/app/src/main/res/layout/content_new_main.xml" value="0.22" />
+        <entry key="..\:/Learning/21-22-2/CV/PalmprintVerification/ncnn-android-yolov4-tiny-custom/app/src/main/res/layout/fragment_first.xml" value="0.25" />
+        <entry key="..\:/Learning/21-22-2/CV/PalmprintVerification/ncnn-android-yolov4-tiny-custom/app/src/main/res/layout/fragment_second.xml" value="0.196875" />
+        <entry key="..\:/Learning/21-22-2/CV/PalmprintVerification/ncnn-android-yolov4-tiny-custom/app/src/main/res/xml/file_paths.xml" value="0.17755825734549138" />
+        <entry key="..\:/Learning/21-22-2/CV/PalmprintVerification/ncnn-android-yolov4-tiny-custom/app/src/main/res/xml/filepaths.xml" value="0.1" />
+      </map>
+    </option>
+  </component>
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="JavaScriptSettings">
+    <option name="languageLevel" value="ES6" />
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK" />
+</project>
